@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import nlu.fit.crm_system.DTO.request.LoginRequest;
 import nlu.fit.crm_system.DTO.response.TokenResponse;
 import nlu.fit.crm_system.Entities.User;
+import nlu.fit.crm_system.mapper.TokenMapper;
+import nlu.fit.crm_system.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +24,10 @@ public class AuthService {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new TokenResponse(accessToken, refreshToken);
+        return TokenMapper.toTokenResponse(
+                accessToken,
+                refreshToken,
+                UserMapper.toUserResponse(user)
+        );
     }
 }
