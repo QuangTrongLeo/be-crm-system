@@ -1,4 +1,4 @@
-package nlu.fit.crm_system.dto.response;
+package nlu.fit.crm_system.DTO.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,8 +1,8 @@
-package nlu.fit.crm_system.service;
+package nlu.fit.crm_system.Service.Impl;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import nlu.fit.crm_system.entity.User;
+import nlu.fit.crm_system.Entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

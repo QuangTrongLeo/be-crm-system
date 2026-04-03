@@ -1,10 +1,10 @@
-package nlu.fit.crm_system.controller;
+package nlu.fit.crm_system.Controller;
 
 import lombok.RequiredArgsConstructor;
-import nlu.fit.crm_system.dto.request.LoginRequest;
-import nlu.fit.crm_system.dto.response.ApiResponse;
-import nlu.fit.crm_system.dto.response.TokenResponse;
-import nlu.fit.crm_system.service.AuthService;
+import nlu.fit.crm_system.DTO.request.LoginRequest;
+import nlu.fit.crm_system.DTO.response.ApiResponse;
+import nlu.fit.crm_system.DTO.response.TokenResponse;
+import nlu.fit.crm_system.Service.Impl.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

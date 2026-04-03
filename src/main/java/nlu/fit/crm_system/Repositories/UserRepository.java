@@ -1,7 +1,7 @@
-package nlu.fit.crm_system.repository;
+package nlu.fit.crm_system.Repositories;
 
 
-import nlu.fit.crm_system.entity.User;
+import nlu.fit.crm_system.Entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
