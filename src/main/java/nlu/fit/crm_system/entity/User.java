@@ -35,15 +35,15 @@ public class User {
 
     private LocalDateTime createdAt;
 
-    // Quan hệ
-    @OneToMany(mappedBy = "assignedUser")
-    private List<Customer> customers;
-
-    @OneToMany(mappedBy = "user")
-    private List<Note> notes;
-
-    @OneToMany(mappedBy = "user")
-    private List<Interaction> interactions;
+//    // Quan hệ
+//    @OneToMany(mappedBy = "assignedUser")
+//    private List<Customer> customers;
+//
+//    @OneToMany(mappedBy = "user")
+//    private List<Note> notes;
+//
+//    @OneToMany(mappedBy = "user")
+//    private List<Interaction> interactions;
 
     @PrePersist
     public void prePersist() {
