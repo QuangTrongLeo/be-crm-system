@@ -1,5 +1,6 @@
 package nlu.fit.crm_system.Service.Impl;
 
+import nlu.fit.crm_system.DTO.request.SearchRequest;
 import nlu.fit.crm_system.DTO.request.UpdateCustomerRequest;
 import nlu.fit.crm_system.Entities.Customer;
 import nlu.fit.crm_system.Repositories.CustomerRepo;
@@ -8,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -90,4 +93,66 @@ public class CustomerService extends AService implements ICustomerService {
             throw dive;
         }
     }
+
+    private List<Customer> getAssignedCustomers(Long userId) {
+        return customerRepo.findAll().stream()
+                .filter(c -> c.getAssignedUserId() != null &&
+                        c.getAssignedUserId().equals(userId)).toList();
+    }
+
+    @Override
+    public List<Customer> searchFor(SearchRequest searchTerm) {
+        if (searchTerm == null) {
+            log.error("searchFor", "Provided searchTerm is null or blank");
+            throw new IllegalArgumentException("Invalid searchTerm");
+        }
+
+        var user_id = searchTerm.getUser_id();
+        var assignedCustomers = getAssignedCustomers(user_id);
+        var searchText = searchTerm.getSearchTerm().toLowerCase();
+        var filter = searchTerm.getFilter();
+        assignedCustomers = filterCustomers(assignedCustomers, filter);
+
+        if (searchText.contains("@")) {
+            log.info("Searching for customer by email");
+            return assignedCustomers.stream()
+                    .filter(c -> c.getEmail() != null &&
+                            c.getEmail().contains(searchText))
+                    .toList();
+        }
+
+        if (searchText.matches("[0-9]")) {
+            log.info("Searching for customer by phone");
+            return assignedCustomers.stream()
+                    .filter(c -> c.getPhone() != null &&
+                            c.getPhone().contains(searchText))
+                    .toList();
+        }
+
+        log.info("Searching for customer by name");
+        return assignedCustomers.stream()
+                .filter(c -> (c.getFirstName() != null &&
+                        c.getFirstName().toLowerCase().contains(searchText)) ||
+                        (c.getLastName() != null &&
+                                c.getLastName().toLowerCase().contains(searchText)))
+                .toList();
+
+    }
+
+    private List<Customer> filterCustomers(List<Customer> customers, String filter) {
+        if (filter == null || filter.isBlank()) {
+            return customers;
+        }
+        log.info("Filtering customers by filter: " + filter);
+        String f = filter.trim().toUpperCase();
+        if (!ALLOWED_STATUS.contains(f)) {
+            log.warn("filterCustomers", "Invalid filter value: " + filter);
+            throw new IllegalArgumentException("Invalid filter value. Allowed: " + ALLOWED_STATUS);
+        }
+        return customers.stream()
+                .filter(c -> c.getStatus() != null &&
+                        c.getStatus().equalsIgnoreCase(f))
+                .toList();
+    }
+
 }
