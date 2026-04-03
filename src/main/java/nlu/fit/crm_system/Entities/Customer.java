@@ -29,4 +29,6 @@ public class Customer {
     private String company;
     @Column(name = "status")
     private String status;
+    @Column(name = "assigned_user_id")
+    private Long assignedUserId;
 }
