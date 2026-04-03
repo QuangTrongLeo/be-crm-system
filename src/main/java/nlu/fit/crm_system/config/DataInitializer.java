@@ -1,9 +1,9 @@
 package nlu.fit.crm_system.config;
 
 import lombok.RequiredArgsConstructor;
-import nlu.fit.crm_system.entity.User;
+import nlu.fit.crm_system.Entities.User;
 import nlu.fit.crm_system.enums.Role;
-import nlu.fit.crm_system.repository.UserRepository;
+import nlu.fit.crm_system.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

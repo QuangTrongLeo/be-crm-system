@@ -1,9 +1,9 @@
-package nlu.fit.crm_system.service;
+package nlu.fit.crm_system.Service.Impl;
 
 import lombok.RequiredArgsConstructor;
-import nlu.fit.crm_system.dto.request.LoginRequest;
-import nlu.fit.crm_system.dto.response.TokenResponse;
-import nlu.fit.crm_system.entity.User;
+import nlu.fit.crm_system.DTO.request.LoginRequest;
+import nlu.fit.crm_system.DTO.response.TokenResponse;
+import nlu.fit.crm_system.Entities.User;
 import org.springframework.stereotype.Service;
 
 @Service

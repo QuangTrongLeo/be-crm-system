@@ -1,4 +1,4 @@
-package nlu.fit.crm_system.dto.request;
+package nlu.fit.crm_system.DTO.request;
 
 import lombok.Data;
 

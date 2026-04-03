@@ -1,11 +1,10 @@
-package nlu.fit.crm_system.entity;
+package nlu.fit.crm_system.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
 import nlu.fit.crm_system.enums.Role;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -35,15 +34,15 @@ public class User {
 
     private LocalDateTime createdAt;
 
-    // Quan hệ
-    @OneToMany(mappedBy = "assignedUser")
-    private List<Customer> customers;
-
-    @OneToMany(mappedBy = "user")
-    private List<Note> notes;
-
-    @OneToMany(mappedBy = "user")
-    private List<Interaction> interactions;
+//    // Quan hệ
+//    @OneToMany(mappedBy = "assignedUser")
+//    private List<Customer> customers;
+//
+//    @OneToMany(mappedBy = "user")
+//    private List<Note> notes;
+//
+//    @OneToMany(mappedBy = "user")
+//    private List<Interaction> interactions;
 
     @PrePersist
     public void prePersist() {

@@ -1,8 +1,8 @@
-package nlu.fit.crm_system.service;
+package nlu.fit.crm_system.Service.Impl;
 
 import lombok.RequiredArgsConstructor;
-import nlu.fit.crm_system.entity.User;
-import nlu.fit.crm_system.repository.UserRepository;
+import nlu.fit.crm_system.Entities.User;
+import nlu.fit.crm_system.Repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 
