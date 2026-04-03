@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import nlu.fit.crm_system.DTO.request.LoginRequest;
 import nlu.fit.crm_system.DTO.response.TokenResponse;
 import nlu.fit.crm_system.Entities.User;
+import nlu.fit.crm_system.mapper.TokenMapper;
+import nlu.fit.crm_system.mapper.UserMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,10 +17,17 @@ public class AuthService {
     // Đăng nhập
     public TokenResponse login(LoginRequest request) {
         User user = userService.findUserByEmail(request.getEmail());
+        if (!request.getPassword().equals(user.getPassword())) {
+            throw new RuntimeException("Sai mật khẩu!");
+        }
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new TokenResponse(accessToken, refreshToken);
+        return TokenMapper.toTokenResponse(
+                accessToken,
+                refreshToken,
+                UserMapper.toUserResponse(user)
+        );
     }
 }
