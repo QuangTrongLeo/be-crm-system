@@ -65,9 +65,9 @@ public class JwtService {
     /**
      * Trích xuất roles từ token
      */
-    public List<String> extractRoles(String token) {
+    public String extractRole(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.get("roles", List.class);
+        return claims.get("role", String.class);
     }
 
     /**

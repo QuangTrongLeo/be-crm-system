@@ -40,11 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String email = jwtService.extractEmail(token);
-            List<String> roles = jwtService.extractRoles(token);
+            String role = jwtService.extractRole(token);
 
-            var authorities = roles.stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                    .toList();
+            var authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + role)
+            );
 
             var authentication = new UsernamePasswordAuthenticationToken(
                     email,

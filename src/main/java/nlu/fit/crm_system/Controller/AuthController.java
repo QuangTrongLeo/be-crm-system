@@ -23,7 +23,7 @@ public class AuthController {
         TokenResponse tokenResponse = authService.login(request);
         return ResponseEntity.ok(
                 ApiResponse.<TokenResponse>builder()
-                        .success(true)
+                        .code(200)
                         .message("Đăng nhập thành công")
                         .data(tokenResponse)
                         .build()
