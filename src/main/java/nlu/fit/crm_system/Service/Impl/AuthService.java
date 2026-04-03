@@ -15,6 +15,9 @@ public class AuthService {
     // Đăng nhập
     public TokenResponse login(LoginRequest request) {
         User user = userService.findUserByEmail(request.getEmail());
+        if (!request.getPassword().equals(user.getPassword())) {
+            throw new RuntimeException("Sai mật khẩu!");
+        }
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);

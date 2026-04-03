@@ -24,6 +24,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "full_name")
     private String fullName;
 
     @Column(unique = true)
