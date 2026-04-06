@@ -1,28 +1,38 @@
 package nlu.fit.crm_system.Controller;
 
 import jakarta.validation.Valid;
+import nlu.fit.crm_system.DTO.request.SearchRequest;
 import nlu.fit.crm_system.DTO.request.UpdateCustomerRequest;
 import nlu.fit.crm_system.Entities.Customer;
 import nlu.fit.crm_system.Service.Interfaces.ICustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/customer/")
+@RequestMapping("${api.crm-system-url}/customer/")
 public class CustomerController {
     @Autowired
     ICustomerService customerService;
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     public ResponseEntity<Customer> getCustomerById(@PathVariable String id){
         Customer customer = customerService.getCustomerById(id);
         return ResponseEntity.ok(customer);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("{id}")
     public ResponseEntity<Customer> updateCustomer(@PathVariable String id, @Valid @RequestBody UpdateCustomerRequest request) {
         Customer updated = customerService.updateCustomer(id, request);
         return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("search")
+    public ResponseEntity<List<Customer>> getAllCustomers(@Valid @RequestBody SearchRequest searchTerm) {
+        var list = customerService.searchFor(searchTerm);
+        return ResponseEntity.ok(list);
     }
 }

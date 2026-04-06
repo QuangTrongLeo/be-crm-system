@@ -1,0 +1,16 @@
+package nlu.fit.crm_system.DTO.request;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class SearchRequest {
+    private String searchTerm;
+    private String filter;
+    private long user_id;
+}
