@@ -12,4 +12,6 @@ public interface ICustomerService {
     Customer getCustomerById(String id);
     Customer updateCustomer(String id, UpdateCustomerRequest request);
     List<Customer> searchFor(SearchRequest searchTerm);
+    List<Customer> getAllCustomers();
+    void deleteCustomer(String id);
 }

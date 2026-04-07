@@ -31,6 +31,34 @@ public class CustomerService extends AService implements ICustomerService {
     }
 
     @Override
+    public List<Customer> getAllCustomers() {
+        log.info("getAllCustomers", "Fetching all customers");
+        return customerRepo.findAll();
+    }
+
+    @Override
+    public void deleteCustomer(String id) {
+        if (id == null || id.isBlank()) {
+            log.warn("deleteCustomer", "Provided id is null or blank");
+            throw new IllegalArgumentException("Invalid id");
+        }
+
+        Long parsedId;
+        try {
+            parsedId = Long.parseLong(id.trim());
+        } catch (NumberFormatException ex) {
+            log.warn("deleteCustomer", "Invalid id format: " + id);
+            throw new IllegalArgumentException("Invalid id format");
+        }
+
+        Customer existing = customerRepo.findById(parsedId)
+                .orElseThrow(() -> new java.util.NoSuchElementException("Customer not found"));
+
+        customerRepo.delete(existing);
+        log.info("deleteCustomer", "Deleted customer id=" + parsedId);
+    }
+
+    @Override
     public Customer getCustomerById(String id) {
         if (id == null || id.isBlank()) {
             log.warn("getCustomerById", "Provided id is null or blank");
@@ -138,6 +166,8 @@ public class CustomerService extends AService implements ICustomerService {
                 .toList();
 
     }
+
+
 
     private List<Customer> filterCustomers(List<Customer> customers, String filter) {
         if (filter == null || filter.isBlank()) {
