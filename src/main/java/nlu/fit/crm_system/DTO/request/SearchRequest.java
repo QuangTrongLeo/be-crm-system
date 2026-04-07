@@ -12,5 +12,4 @@ import lombok.NoArgsConstructor;
 public class SearchRequest {
     private String searchTerm;
     private String filter;
-    private long user_id;
 }

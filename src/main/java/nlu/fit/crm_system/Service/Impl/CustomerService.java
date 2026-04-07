@@ -1,23 +1,29 @@
 package nlu.fit.crm_system.Service.Impl;
 
+import nlu.fit.crm_system.DTO.request.CreateCustomerRequest;
 import nlu.fit.crm_system.DTO.request.SearchRequest;
 import nlu.fit.crm_system.DTO.request.UpdateCustomerRequest;
 import nlu.fit.crm_system.Entities.Customer;
 import nlu.fit.crm_system.Repositories.CustomerRepo;
 import nlu.fit.crm_system.Service.Interfaces.ICustomerService;
+import nlu.fit.crm_system.Utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import nlu.fit.crm_system.mapper.CustomerMapper;
+import nlu.fit.crm_system.DTO.response.CustomerResponse;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
 @Service
+
 public class CustomerService extends AService implements ICustomerService {
     @Autowired
     private CustomerRepo customerRepo;
+    @Autowired
+    private JwtUtils jwtUtils;
 
     private static final Set<String> ALLOWED_STATUS = Set.of("LEAD", "POTENTIAL", "ACTIVE", "INACTIVE");
 
@@ -31,7 +37,7 @@ public class CustomerService extends AService implements ICustomerService {
     }
 
     @Override
-    public Customer getCustomerById(String id) {
+    public CustomerResponse getCustomerById(String id) {
         if (id == null || id.isBlank()) {
             log.warn("getCustomerById", "Provided id is null or blank");
             throw new IllegalArgumentException("Invalid id");
@@ -49,11 +55,11 @@ public class CustomerService extends AService implements ICustomerService {
             throw new java.util.NoSuchElementException("Customer not found");
         }
         log.info("getCustomerById", "Customer found for id=" + parsedId);
-        return result.get();
+        return CustomerMapper.toCustomerResponse(result.get());
     }
 
     @Override
-    public Customer updateCustomer(String id, UpdateCustomerRequest request) {
+    public CustomerResponse updateCustomer(String id, UpdateCustomerRequest request) {
         if (id == null || id.isBlank()) {
             log.warn("updateCustomer", "Provided id is null or blank");
             throw new IllegalArgumentException("Invalid id");
@@ -86,57 +92,103 @@ public class CustomerService extends AService implements ICustomerService {
         try {
             Customer saved = customerRepo.save(existing);
             log.info("updateCustomer", "Updated customer id=" + parsedId);
-            return saved;
+            return CustomerMapper.toCustomerResponse(saved);
         } catch (DataIntegrityViolationException dive) {
-            log.warn("updateCustomer", "Data integrity violation: " + dive.getMostSpecificCause().getMessage());
-            // Rethrow to be handled as 409 Conflict by GlobalExceptionHandler (to be added)
+            log.warn("updateCustomer",
+                    "Data integrity violation: " + dive.getMostSpecificCause().getMessage());
             throw dive;
         }
     }
 
-    private List<Customer> getAssignedCustomers(Long userId) {
-        return customerRepo.findAll().stream()
-                .filter(c -> c.getAssignedUserId() != null &&
-                        c.getAssignedUserId().equals(userId)).toList();
-    }
-
     @Override
-    public List<Customer> searchFor(SearchRequest searchTerm) {
+    public List<CustomerResponse> searchFor(SearchRequest searchTerm) {
         if (searchTerm == null) {
             log.error("searchFor", "Provided searchTerm is null or blank");
             throw new IllegalArgumentException("Invalid searchTerm");
         }
 
-        var user_id = searchTerm.getUser_id();
+        var user_id = jwtUtils.getCurrentUser().getId();
         var assignedCustomers = getAssignedCustomers(user_id);
-        var searchText = searchTerm.getSearchTerm().toLowerCase();
+        var searchText = searchTerm.getSearchTerm() != null ? searchTerm.getSearchTerm().trim().toLowerCase() : "";
         var filter = searchTerm.getFilter();
         assignedCustomers = filterCustomers(assignedCustomers, filter);
 
+        List<Customer> result;
+
         if (searchText.contains("@")) {
             log.info("Searching for customer by email");
-            return assignedCustomers.stream()
+            result = assignedCustomers.stream()
                     .filter(c -> c.getEmail() != null &&
-                            c.getEmail().contains(searchText))
+                            c.getEmail().toLowerCase().contains(searchText))
                     .toList();
         }
 
-        if (searchText.matches("[0-9]")) {
+        else if (searchText.matches("[0-9]")) {
             log.info("Searching for customer by phone");
-            return assignedCustomers.stream()
+            result = assignedCustomers.stream()
                     .filter(c -> c.getPhone() != null &&
                             c.getPhone().contains(searchText))
                     .toList();
         }
 
-        log.info("Searching for customer by name");
-        return assignedCustomers.stream()
-                .filter(c -> (c.getFirstName() != null &&
-                        c.getFirstName().toLowerCase().contains(searchText)) ||
-                        (c.getLastName() != null &&
-                                c.getLastName().toLowerCase().contains(searchText)))
-                .toList();
+        else {
+            log.info("Searching for customer by name");
+            result = assignedCustomers.stream()
+                    .filter(c -> (c.getFirstName() != null &&
+                            c.getFirstName().toLowerCase().contains(searchText)) ||
+                            (c.getLastName() != null &&
+                                    c.getLastName().toLowerCase().contains(searchText)))
+                    .toList();
+        }
 
+        return CustomerMapper.toCustomerResponseList(result);
+    }
+
+    @Override
+    public List<CustomerResponse> getAllCustomers() {
+        List<Customer> customers = customerRepo.findAll();
+        log.info("getAllCustomers", "Fetched all customers");
+        return CustomerMapper.toCustomerResponseList(customers);
+    }
+
+    @Override
+    public CustomerResponse createCustomer(CreateCustomerRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request is null");
+        }
+        String status = request.getStatus() != null ? request.getStatus().trim().toUpperCase() : "LEAD";
+        if (!ALLOWED_STATUS.contains(status)) {
+            throw new IllegalArgumentException("Invalid status. Allowed: " + ALLOWED_STATUS);
+        }
+        var user_id = jwtUtils.getCurrentUser().getId();
+        Customer customer = Customer.builder()
+                .firstName(request.getFirstName().trim())
+                .lastName(request.getLastName().trim())
+                .email(request.getEmail() != null ? request.getEmail().trim() : null)
+                .phone(request.getPhone() != null ? request.getPhone().trim() : null)
+                .company(request.getCompany() != null ? request.getCompany().trim() : null)
+                .status(status)
+                .assignedUserId(user_id)
+                .build();
+        Customer saved = customerRepo.save(customer);
+        log.info("createCustomer", "Created customer id=" + saved.getId());
+        return CustomerMapper.toCustomerResponse(saved);
+    }
+
+    @Override
+    public void deleteCustomer(String id) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("Invalid id");
+        }
+        Long parsedId;
+        try {
+            parsedId = Long.parseLong(id.trim());
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("Invalid id format");
+        }
+        Customer customer = customerRepo.findById(parsedId).orElseThrow(() -> new RuntimeException("Customer not found"));
+        customerRepo.delete(customer);
+        log.info("deleteCustomer", "Deleted customer id=" + parsedId);
     }
 
     private List<Customer> filterCustomers(List<Customer> customers, String filter) {
@@ -153,6 +205,12 @@ public class CustomerService extends AService implements ICustomerService {
                 .filter(c -> c.getStatus() != null &&
                         c.getStatus().equalsIgnoreCase(f))
                 .toList();
+    }
+
+    private List<Customer> getAssignedCustomers(Long userId) {
+        return customerRepo.findAll().stream()
+                .filter(c -> c.getAssignedUserId() != null &&
+                        c.getAssignedUserId().equals(userId)).toList();
     }
 
 }
