@@ -1,7 +1,6 @@
 package nlu.fit.crm_system.Service.Impl;
 
 import nlu.fit.crm_system.DTO.request.CreateCustomerRequest;
-import nlu.fit.crm_system.DTO.request.SearchRequest;
 import nlu.fit.crm_system.DTO.request.UpdateCustomerRequest;
 import nlu.fit.crm_system.Entities.Customer;
 import nlu.fit.crm_system.Repositories.CustomerRepo;
@@ -100,49 +99,49 @@ public class CustomerService extends AService implements ICustomerService {
         }
     }
 
-    @Override
-    public List<CustomerResponse> searchFor(SearchRequest searchTerm) {
-        if (searchTerm == null) {
-            log.error("searchFor", "Provided searchTerm is null or blank");
-            throw new IllegalArgumentException("Invalid searchTerm");
-        }
-
-        var user_id = jwtUtils.getCurrentUser().getId();
-        var assignedCustomers = getAssignedCustomers(user_id);
-        var searchText = searchTerm.getSearchTerm() != null ? searchTerm.getSearchTerm().trim().toLowerCase() : "";
-        var filter = searchTerm.getFilter();
-        assignedCustomers = filterCustomers(assignedCustomers, filter);
-
-        List<Customer> result;
-
-        if (searchText.contains("@")) {
-            log.info("Searching for customer by email");
-            result = assignedCustomers.stream()
-                    .filter(c -> c.getEmail() != null &&
-                            c.getEmail().toLowerCase().contains(searchText))
-                    .toList();
-        }
-
-        else if (searchText.matches("[0-9]")) {
-            log.info("Searching for customer by phone");
-            result = assignedCustomers.stream()
-                    .filter(c -> c.getPhone() != null &&
-                            c.getPhone().contains(searchText))
-                    .toList();
-        }
-
-        else {
-            log.info("Searching for customer by name");
-            result = assignedCustomers.stream()
-                    .filter(c -> (c.getFirstName() != null &&
-                            c.getFirstName().toLowerCase().contains(searchText)) ||
-                            (c.getLastName() != null &&
-                                    c.getLastName().toLowerCase().contains(searchText)))
-                    .toList();
-        }
-
-        return CustomerMapper.toCustomerResponseList(result);
-    }
+//    @Override
+//    public List<CustomerResponse> searchFor(SearchRequest searchTerm) {
+//        if (searchTerm == null) {
+//            log.error("searchFor", "Provided searchTerm is null or blank");
+//            throw new IllegalArgumentException("Invalid searchTerm");
+//        }
+//
+//        var user_id = jwtUtils.getCurrentUser().getId();
+//        var assignedCustomers = getAssignedCustomers(user_id);
+//        var searchText = searchTerm.getSearchTerm() != null ? searchTerm.getSearchTerm().trim().toLowerCase() : "";
+//        var filter = searchTerm.getFilter();
+//        assignedCustomers = filterCustomers(assignedCustomers, filter);
+//
+//        List<Customer> result;
+//
+//        if (searchText.contains("@")) {
+//            log.info("Searching for customer by email");
+//            result = assignedCustomers.stream()
+//                    .filter(c -> c.getEmail() != null &&
+//                            c.getEmail().toLowerCase().contains(searchText))
+//                    .toList();
+//        }
+//
+//        else if (searchText.matches("[0-9]")) {
+//            log.info("Searching for customer by phone");
+//            result = assignedCustomers.stream()
+//                    .filter(c -> c.getPhone() != null &&
+//                            c.getPhone().contains(searchText))
+//                    .toList();
+//        }
+//
+//        else {
+//            log.info("Searching for customer by name");
+//            result = assignedCustomers.stream()
+//                    .filter(c -> (c.getFirstName() != null &&
+//                            c.getFirstName().toLowerCase().contains(searchText)) ||
+//                            (c.getLastName() != null &&
+//                                    c.getLastName().toLowerCase().contains(searchText)))
+//                    .toList();
+//        }
+//
+//        return CustomerMapper.toCustomerResponseList(result);
+//    }
 
     @Override
     public List<CustomerResponse> getAllCustomers() {
@@ -160,7 +159,7 @@ public class CustomerService extends AService implements ICustomerService {
         if (!ALLOWED_STATUS.contains(status)) {
             throw new IllegalArgumentException("Invalid status. Allowed: " + ALLOWED_STATUS);
         }
-        var user_id = jwtUtils.getCurrentUser().getId();
+        var user = jwtUtils.getCurrentUser();
         Customer customer = Customer.builder()
                 .firstName(request.getFirstName().trim())
                 .lastName(request.getLastName().trim())
@@ -168,7 +167,7 @@ public class CustomerService extends AService implements ICustomerService {
                 .phone(request.getPhone() != null ? request.getPhone().trim() : null)
                 .company(request.getCompany() != null ? request.getCompany().trim() : null)
                 .status(status)
-                .assignedUserId(user_id)
+                .assignedUser(user)
                 .build();
         Customer saved = customerRepo.save(customer);
         log.info("createCustomer", "Created customer id=" + saved.getId());
@@ -191,6 +190,39 @@ public class CustomerService extends AService implements ICustomerService {
         log.info("deleteCustomer", "Deleted customer id=" + parsedId);
     }
 
+
+    @Override
+    public List<CustomerResponse> search(String keyword) {
+        String k = keyword == null ? "" : keyword.trim().toLowerCase();
+        List<Customer> result = customerRepo.findAll().stream()
+                .filter(c -> matchCustomer(c, k))
+                .toList();
+        return CustomerMapper.toCustomerResponseList(result);
+    }
+
+    private boolean matchCustomer(Customer c, String keyword) {
+        if (keyword == null || keyword.isBlank()) return true;
+
+        String k = keyword.toLowerCase();
+
+        return (c.getFirstName() != null &&
+                c.getFirstName().toLowerCase().contains(k))
+
+                || (c.getLastName() != null &&
+                c.getLastName().toLowerCase().contains(k))
+
+                || (c.getEmail() != null &&
+                c.getEmail().toLowerCase().contains(k))
+
+                || (c.getPhone() != null &&
+                c.getPhone().contains(keyword))
+
+                || (c.getCompany() != null &&
+                c.getCompany().toLowerCase().contains(k));
+    }
+
+
+
     private List<Customer> filterCustomers(List<Customer> customers, String filter) {
         if (filter == null || filter.isBlank()) {
             return customers;
@@ -207,10 +239,10 @@ public class CustomerService extends AService implements ICustomerService {
                 .toList();
     }
 
-    private List<Customer> getAssignedCustomers(Long userId) {
-        return customerRepo.findAll().stream()
-                .filter(c -> c.getAssignedUserId() != null &&
-                        c.getAssignedUserId().equals(userId)).toList();
-    }
+//    private List<Customer> getAssignedCustomers(Long userId) {
+//        return customerRepo.findAll().stream()
+//                .filter(c -> c.getAssignedUserId() != null &&
+//                        c.getAssignedUserId().equals(userId)).toList();
+//    }
 
 }

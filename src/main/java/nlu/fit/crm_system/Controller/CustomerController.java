@@ -94,16 +94,31 @@ public class CustomerController {
     }
 
     // ===== SEARCH CUSTOMER =====
-    @PostMapping("/search")
-    public ResponseEntity<ApiResponse<List<CustomerResponse>>> searchCustomers(
-            @Valid @RequestBody SearchRequest searchTerm) {
+//    @PostMapping("/search")
+//    public ResponseEntity<ApiResponse<List<CustomerResponse>>> searchCustomers(
+//            @Valid @RequestBody SearchRequest searchTerm) {
+//
+//        List<CustomerResponse> list = customerService.searchFor(searchTerm);
+//        return ResponseEntity.ok(
+//                ApiResponse.<List<CustomerResponse>>builder()
+//                        .code(200)
+//                        .message("Tìm kiếm khách hàng thành công")
+//                        .data(list)
+//                        .build()
+//        );
+//    }
 
-        List<CustomerResponse> list = customerService.searchFor(searchTerm);
+    // ===== SEARCH CUSTOMER =====
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<CustomerResponse>>> searchCustomer(
+            @RequestParam(required = false) String keyword
+    ) {
+        List<CustomerResponse> responses = customerService.search(keyword);
         return ResponseEntity.ok(
                 ApiResponse.<List<CustomerResponse>>builder()
                         .code(200)
                         .message("Tìm kiếm khách hàng thành công")
-                        .data(list)
+                        .data(responses)
                         .build()
         );
     }

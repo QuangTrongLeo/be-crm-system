@@ -2,7 +2,7 @@ package nlu.fit.crm_system.Utils;
 
 import lombok.RequiredArgsConstructor;
 import nlu.fit.crm_system.Entities.User;
-import nlu.fit.crm_system.Repositories.UserRepository;
+import nlu.fit.crm_system.Repositories.UserRepo;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JwtUtils {
 
-    private final UserRepository userRepository;
+    private final UserRepo userRepository;
 
     public Authentication getAuthentication() {
         return SecurityContextHolder.getContext().getAuthentication();

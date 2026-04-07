@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,20 +32,11 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role = Role.SALES;
 
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-//    // Quan hệ
-//    @OneToMany(mappedBy = "assignedUser")
-//    private List<Customer> customers;
-//
-//    @OneToMany(mappedBy = "user")
-//    private List<Note> notes;
-//
-//    @OneToMany(mappedBy = "user")
-//    private List<Interaction> interactions;
-
     @PrePersist
-    public void prePersist() {
-        this.createdAt = LocalDateTime.now();
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 }

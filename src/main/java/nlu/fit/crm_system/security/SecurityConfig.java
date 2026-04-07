@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(baseUrl + "/auth/**").permitAll()
                         .requestMatchers(baseUrl + "/customer/**").permitAll()
+                        .requestMatchers(baseUrl + "/notes/**").permitAll()
+                        .requestMatchers(baseUrl + "/interactions/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

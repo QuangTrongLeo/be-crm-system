@@ -3,7 +3,7 @@ package nlu.fit.crm_system.config;
 import lombok.RequiredArgsConstructor;
 import nlu.fit.crm_system.Entities.User;
 import nlu.fit.crm_system.enums.Role;
-import nlu.fit.crm_system.Repositories.UserRepository;
+import nlu.fit.crm_system.Repositories.UserRepo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 
-    private final UserRepository userRepository;
+    private final UserRepo userRepository;
 
     @Value("${admin.username}")
     private String adminUsername;

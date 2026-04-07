@@ -13,7 +13,8 @@ import java.util.List;
 public interface ICustomerService {
     CustomerResponse getCustomerById(String id);
     CustomerResponse updateCustomer(String id, UpdateCustomerRequest request);
-    List<CustomerResponse> searchFor(SearchRequest searchTerm);
+//    List<CustomerResponse> searchFor(SearchRequest searchTerm);
+    List<CustomerResponse> search(String keyword);
     List<CustomerResponse> getAllCustomers();
     CustomerResponse createCustomer(CreateCustomerRequest request);
     void deleteCustomer(String id);

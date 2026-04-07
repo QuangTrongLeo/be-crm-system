@@ -18,7 +18,7 @@ public class CustomerMapper {
                 .phone(customer.getPhone())
                 .company(customer.getCompany())
                 .status(customer.getStatus())
-                .assignedUserId(customer.getAssignedUserId())
+                .assignedUserId(customer.getAssignedUser().getId())
                 .build();
     }
 
