@@ -3,6 +3,7 @@ package nlu.fit.crm_system.Controller;
 import jakarta.validation.Valid;
 import nlu.fit.crm_system.DTO.request.SearchRequest;
 import nlu.fit.crm_system.DTO.request.UpdateCustomerRequest;
+import nlu.fit.crm_system.DTO.request.CreateCustomerRequest;
 import nlu.fit.crm_system.DTO.response.ApiResponse;
 import nlu.fit.crm_system.Entities.Customer;
 import nlu.fit.crm_system.Service.Interfaces.ICustomerService;
@@ -18,6 +19,12 @@ import java.util.List;
 public class CustomerController {
     @Autowired
     ICustomerService customerService;
+
+    @PostMapping
+    public ResponseEntity<Customer> createCustomer(@Valid @RequestBody CreateCustomerRequest request) {
+        Customer created = customerService.createCustomer(request);
+        return ResponseEntity.status(201).body(created);
+    }
 
     @GetMapping
     public ResponseEntity<List<Customer>> getAllCustomers() {
