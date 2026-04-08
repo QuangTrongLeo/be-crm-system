@@ -2,6 +2,7 @@ package nlu.fit.crm_system.Controller;
 
 import jakarta.validation.Valid;
 import nlu.fit.crm_system.DTO.request.CreateNoteRequest;
+import nlu.fit.crm_system.DTO.response.ApiResponse;
 import nlu.fit.crm_system.Entities.Note;
 import nlu.fit.crm_system.Service.Interfaces.INoteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,19 +18,38 @@ public class NoteController {
     private INoteService noteService;
 
     @PostMapping
-    public ResponseEntity<Note> addNote(@Valid @RequestBody CreateNoteRequest request) {
+    public ResponseEntity<ApiResponse<Note>> addNote(@Valid @RequestBody CreateNoteRequest request) {
         Note created = noteService.addNote(request);
-        return ResponseEntity.status(201).body(created);
+        return ResponseEntity.status(201).body(
+            ApiResponse.<Note>builder()
+                .code(201)
+                .message("Thêm ghi chú thành công")
+                .data(created)
+                .build()
+        );
     }
 
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<Note>> getNotesForCustomer(@PathVariable Long customerId) {
-        return ResponseEntity.ok(noteService.getNotesForCustomer(customerId));
+    public ResponseEntity<ApiResponse<List<Note>>> getNotesForCustomer(@PathVariable Long customerId) {
+        List<Note> notes = noteService.getNotesForCustomer(customerId);
+        return ResponseEntity.ok(
+            ApiResponse.<List<Note>>builder()
+                .code(200)
+                .message("Lấy danh sách ghi chú thành công")
+                .data(notes)
+                .build()
+        );
     }
 
     @PatchMapping("/{noteId}/important")
-    public ResponseEntity<Note> markAsImportant(@PathVariable Long noteId, @RequestParam boolean isImportant) {
-        return ResponseEntity.ok(noteService.markAsImportant(noteId, isImportant));
+    public ResponseEntity<ApiResponse<Note>> markAsImportant(@PathVariable Long noteId, @RequestParam boolean isImportant) {
+        Note updated = noteService.markAsImportant(noteId, isImportant);
+        return ResponseEntity.ok(
+            ApiResponse.<Note>builder()
+                .code(200)
+                .message("Cập nhật trạng thái ghi chú thành công")
+                .data(updated)
+                .build()
+        );
     }
 }
-
