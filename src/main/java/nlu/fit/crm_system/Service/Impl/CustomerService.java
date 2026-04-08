@@ -2,6 +2,7 @@ package nlu.fit.crm_system.Service.Impl;
 
 import nlu.fit.crm_system.DTO.request.SearchRequest;
 import nlu.fit.crm_system.DTO.request.UpdateCustomerRequest;
+import nlu.fit.crm_system.DTO.request.CreateCustomerRequest;
 import nlu.fit.crm_system.Entities.Customer;
 import nlu.fit.crm_system.Repositories.CustomerRepo;
 import nlu.fit.crm_system.Service.Interfaces.ICustomerService;
@@ -28,6 +29,42 @@ public class CustomerService extends AService implements ICustomerService {
     private void initialize(){
         log.setName(this.getClass().getSimpleName());
         log.info("Initializing Customer Service");
+    }
+
+    @Override
+    public Customer createCustomer(CreateCustomerRequest request) {
+        if (request == null) {
+            log.error("createCustomer", "Request is null");
+            throw new IllegalArgumentException("Invalid request");
+        }
+
+        Customer customer = Customer.builder()
+                .firstName(request.getFirstName() != null ? request.getFirstName().trim() : null)
+                .lastName(request.getLastName() != null ? request.getLastName().trim() : null)
+                .email(request.getEmail() != null ? request.getEmail().trim() : null)
+                .phone(request.getPhone() != null ? request.getPhone().trim() : null)
+                .company(request.getCompany() != null ? request.getCompany().trim() : null)
+                .assignedUserId(request.getAssignedUserId())
+                .build();
+
+        if (request.getStatus() != null) {
+            String st = request.getStatus().trim();
+            if (!ALLOWED_STATUS.contains(st)) {
+                throw new IllegalArgumentException("Invalid status. Allowed: " + ALLOWED_STATUS);
+            }
+            customer.setStatus(st);
+        } else {
+            customer.setStatus("LEAD"); // Default status, optional
+        }
+
+        try {
+            Customer saved = customerRepo.save(customer);
+            log.info("createCustomer", "Created customer with id=" + saved.getId());
+            return saved;
+        } catch (DataIntegrityViolationException dive) {
+            log.warn("createCustomer", "Data integrity violation: " + dive.getMostSpecificCause().getMessage());
+            throw dive;
+        }
     }
 
     @Override
